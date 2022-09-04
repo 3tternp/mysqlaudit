@@ -1,0 +1,228 @@
+Operating System Level Configuration
+
+1. Place Databases on Non-­‐System Partitions (Scored)
+   
+# show variables where variable_name = 'datadir';
+# df -h <datadir Value>
+
+2. Use Dedicated Least Privileged Account for MySQL Daemon/Service (Scored)
+
+# ps -ef | egrep "^mysql.*$"
+If no	lines	are returned, then this is a finding
+
+3. Disable MySQL Command History (Scored)
+
+#find /home -name ".mysql_history"
+
+4. Verify That the MYSQL_PWD	Environment Variables Is Not	In Use (Scored)
+
+#grep MYSQL_PWD /proc/*/environ
+
+5. Disable Interactive Login(Scored)
+
+#getent passwd mysql | egrep "^.*[\/bin\/false|\/sbin\/nologin]$"
+
+6. Verify That 'MYSQL_PWD' Is Not	Set	In Users' Profiles (Scored)
+
+# grep MYSQL_PWD /home/*/.{bashrc,profile,bash_profile}
+
+
+7. Set a Password	Expiry Policy for Specific Users (Not Scored)
+
+# SELECT user, host, password_lifetime from mysql.user from mysql.user where password_lifetime IS NULL;
+
+8. Ensure 'datadir' Has Appropriate Permissions (Scored)
+
+# show variables where variable_name = 'datadir';
+# ls -l <datadir>/.. | egrep "^d[r|w|x]{3}------\s*.\s*mysql\s*mysql\s*\d*.*mysql"
+
+9. Ensure 'log_bin_basename' Files Have Appropriate Permissions (Scored)
+
+#show variables like 'log_bin_basename';
+
+10. Ensure 'log_error' Has Appropriate	Permissions	(Scored)
+
+# show global variables like 'log_error';
+
+11. Ensure 'slow_query_log' Has Appropriate Permissions (Scored)
+
+# show variables like 'slow_query_log_file';
+
+12. Ensure 'relay_log_basename' Files Have Appropriate Permissions (Scored)
+
+#show variables like 'relay_log_basename';
+
+13. Ensure 'general_log_file'Has	Appropriate Permissions (Scored)
+
+#show variables like 'general_log_file';
+
+14. Ensure SSL Key Files Have Appropriate Permissions (Scored)
+
+#show variables where variable_name = 'ssl_key';
+Then,execute	
+  the following command	to assess the permissions of the	
+  Value:
+# ls -l <ssl_key Value> | egrep "^-r--------[ \t]*.[ \t]*mysql[ \t]*mysql.*$"
+
+15. Ensure Plugin Directory Has Appropriate Permissions (Scored)
+
+# show variables where variable_name = 'plugin_dir';
+# ls -l <plugin_dir Value>/.. | egrep "^drwxr[-w]xr[-w]x[ \t]*[0-9][ \t]*mysql[\t]*mysql.*plugin.*$"
+
+16. Ensure Latest Security Patches Are Applied (Not Scored)
+
+#SHOW VARIABLES WHERE Variable_name LIKE "version";
+
+17. Ensure the 'test' Database Is Not Installed (Scored)
+
+# SHOW DATABASES LIKE 'test';
+
+18. Ensure 'local_infile' Is Disabled (Scored)
+
+# SHOW VARIABLES WHERE Variable_name = 'local_infile';
+
+19. Ensure'mysqld' Is Not Started with '-­‐-­‐skip-­‐grant-­‐tables'  (Scored)
+   
+Open the MySQL configuration (e.g. my.cnf) file	and search for skip-­‐grant-­‐tables
+• Ensure skip-grant-tables is set to FALSE
+
+20. Ensure '-­‐-­‐skip-­‐symbolic-­‐links' Is Enabled (Scored)
+
+# SHOW variables LIKE 'have_symlink';
+
+21. Ensure the 'daemon_memcached' Plugin Is Disabled (Scored)
+
+ # SELECT * FROM information_schema.plugins WHERE PLUGIN_NAME='daemon_memcached'
+
+22. Ensure  'secure_file_priv' Is Not Empty  (Scored)
+
+# SHOW GLOBAL VARIABLES WHERE Variable_name = 'secure_file_priv' AND Value<>'';
+
+23. Ensure 'sql_mode' Contains  'STRICT_ALL_TABLES'	(Scored)
+
+# SHOW VARIABLES LIKE 'sql_mode';
+
+24. Ensure Only Administrative Users Have Full Database Access (Scored)
+
+# SELECT user, host
+FROM mysql.user
+WHERE (Select_priv = 'Y')
+OR (Insert_priv = 'Y')
+OR (Update_priv = 'Y')
+OR (Delete_priv = 'Y')
+OR (Create_priv = 'Y')
+OR (Drop_priv = 'Y');
+SELECT user, host
+FROM mysql.db
+WHERE db = 'mysql'
+AND ((Select_priv = 'Y')
+OR (Insert_priv = 'Y')
+OR (Update_priv = 'Y')
+OR (Delete_priv = 'Y')
+OR (Create_priv = 'Y')
+OR (Drop_priv = 'Y'));
+
+25. Ensure 'file_priv' Is Not Set to 'Y' for Non-­‐Administrative Users	
+  
+# select user, host from mysql.user where File_priv = 'Y';
+
+26. Ensure 'process_priv' Is Not Set to 'Y' for Non-­‐Administrative Users (Scored)
+
+# select user, host from mysql.user where Process_priv = 'Y';
+
+27. ‎Ensure 'super_priv' Is Not Set to 'Y' for Non-­‐Administrative Users (Scored)
+
+# select user, host from mysql.user where Super_priv = 'Y';
+
+28. Ensure 'shutdown_priv' Is Not	Set to 'Y' for Non-­‐Administrative Users (Scored)
+
+# SELECT user, host FROM mysql.user WHERE Shutdown_priv = 'Y';
+
+29. Ensure 'create_user_priv'Is Not Set to 'Y' for Non-­‐Administrative Users (Scored)
+
+# SELECT user, host FROM mysql.user WHERE Create_user_priv = 'Y';
+
+30. Ensure	'grant_priv' Is Not Set to 'Y' for Non-­‐Administrative Users(Scored)
+
+# SELECT user, host FROM mysql.user WHERE Grant_priv = 'Y';
+# SELECT user, host FROM mysql.db WHERE Grant_priv = 'Y';
+
+31. Ensure 'repl_slave_priv' Is Not Set to 'Y'	 for Non-­‐Slave Users (Scored)
+
+#SELECT user, host FROM mysql.user WHERE Repl_slave_priv = 'Y';
+
+32. Ensure DML/DDL Grants Are Limited to Specific Databases and Users (Scored)
+
+ #SELECT User,Host,Db
+FROM mysql.db
+WHERE Select_priv='Y'
+OR Insert_priv='Y'
+OR Update_priv='Y'
+OR Delete_priv='Y'
+OR Create_priv='Y'
+OR Drop_priv='Y'
+OR Alter_priv='Y';
+
+33. Ensure 'log_error' Is Not Empty (Scored)
+
+# SHOW variables LIKE 'log_error';
+
+34. Ensure	Log Files Are Stored  on  a Non-­‐System Partition	(Scored)
+
+ # SELECT @@global.log_bin_basename;
+
+35. Ensure	'log_error_verbosity Is Not Set to '1' (Scored)
+
+ # SHOW GLOBAL VARIABLES LIKE 'log_error_verbosity';
+
+36. Ensure	'sql_mode' Contains	'NO_AUTO_CREATE_USER' (Scored)
+
+ # SELECT @@global.sql_mode;
+SELECT @@session.sql_mode;
+
+37. Ensure Passwords Are Set	for  All	MySQL Accounts (Scored)
+
+ # SELECT User,host
+FROM mysql.user
+WHERE authentication_string='';
+
+38. Ensure'default_password_lifetime' Is	Less Than Or	Equal To	'90' (Scored)
+
+ #SHOW VARIABLES LIKE 'default_password_lifetime';
+
+39. Ensure	Password	Complexity Is	in	Place (Scored)
+
+ # SHOW VARIABLES LIKE 'validate_password%';
+
+40. Ensure No Users Have  Wildcard Hostnames (Scored)
+  
+# SELECT user, host FROM mysql.user WHERE host = '%';
+ 
+41. Ensure No Anonymous Accounts Exist (Scored)
+
+ # SELECT user,host FROM mysql.user WHERE user = '';
+
+42. Ensure 'have_ssl' Is Set to 'YES' (Scored)
+
+ # SHOW variables WHERE variable_name = 'have_ssl';
+
+43. Ensure	'ssl_type' Is	Set	to	'ANY','X509', or	'SPECIFIED'for	All	Remote Users	(Scored)
+
+ # SELECT user, host, ssl_type FROM mysql.user
+WHERE NOT HOST IN ('::1', '127.0.0.1', 'localhost');
+
+44. Ensure  'MASTER_SSL_VERIFY_SERVER_CERT' Is	 Set	 to	 'YES'  or	  '1'	(Scored)
+
+ # select ssl_verify_server_cert from mysql.slave_master_info;
+
+45. Ensure'master_info_repository' Is	Set	to	'TABLE' (Scored)
+
+ # SHOW GLOBAL VARIABLES LIKE 'master_info_repository';
+ 
+46. Ensure	'super_priv' Is	Not	Set	 to	'Y'	 for	Replication Users  (Scored)
+
+#select user, host from mysql.user where user='repl' and Super_priv = 'Y';
+
+47. Ensure No	 Replication Users	 Have	Wildcard Hostnames  (Scored)
+
+ # SELECT user, host FROM mysql.user WHERE user='repl' AND host = '%';
